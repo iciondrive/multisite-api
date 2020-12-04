@@ -1,0 +1,14 @@
+{
+    "name": "iciondrive/multisite-api",
+    "description": "Create endpoint to the WordPress REST API for multisite. Plugin developed for the \"Ici On Drive\" platform.",
+    "type": "wordpress-plugin",
+    "version": "1.0.0",
+    "license": "GPLv2 or later",
+    "authors": [
+        {
+            "name": "Thomas Navarro",
+            "email": "thomas.navarro@outlook.com"
+        }
+    ],
+    "require": {}
+}
