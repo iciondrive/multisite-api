@@ -10,12 +10,15 @@
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Author URI: http://github.com/thomasnavarro.
  */
+
+namespace IciOnDrive;
+
 if (!defined('ABSPATH')) {
     exit;
 }
 
-if (!class_exists('IOD_Multisite_API')) {
-    class IOD_Multisite_API
+if (!class_exists('Multisite_API')) {
+    class Multisite_API
     {
         /**
          * @var string namespace
@@ -32,8 +35,8 @@ if (!class_exists('IOD_Multisite_API')) {
             // WP hooks
             add_action('init', [$this, 'init_hook']);
 
-            $this->get_sites = new IOD_Multisite_API_Get_Sites();
-            $this->get_site = new IOD_Multisite_API_Get_Site();
+            $this->get_sites = new Get_Sites();
+            $this->get_site = new Get_Site();
         }
 
         public function init_hook()
@@ -47,11 +50,34 @@ if (!class_exists('IOD_Multisite_API')) {
             register_rest_route(
                 self::NAMESPACE, '/sites',
                 [
-                    'methods' => WP_REST_Server::READABLE,
+                    'methods' => \WP_REST_Server::READABLE,
                     'callback' => [$this->get_sites, 'callback'],
                     // 'permission_callback' => [$this, 'get_item_permissions_check'],
-                    'args' => [],
-                ]);
+                    'args' => [
+                        'page' => [
+                            'description' => __('Current page of the result.'),
+                            'type' => 'integer',
+                            'default' => 1,
+                        ],
+                        'per_page' => [
+                            'description' => __('Maximum number of items to be returned in result set.'),
+                            'type' => 'integer',
+                            'default' => 10,
+                        ],
+                        'fields' => [
+                            'default' => true,
+                            'type' => 'boolean',
+                            'description' => __('Retrieves the ACF fields from the site.'),
+                        ],
+                        'gps' => [
+                            'default' => false,
+                            'type' => 'boolean',
+                            'description' => __('Retrieves only the GPS coordinates of the site.'),
+                        ],
+                    ],
+                    // 'schema' => [$this, 'get_public_item_schema'],
+                ]
+            );
 
             // Get site by blog ID
             register_rest_route(
@@ -64,10 +90,21 @@ if (!class_exists('IOD_Multisite_API')) {
                         ],
                     ],
                     [
-                        'methods' => WP_REST_Server::READABLE,
+                        'methods' => \WP_REST_Server::READABLE,
                         'callback' => [$this->get_site, 'callback'],
                         // 'permission_callback' => [$this, 'get_item_permissions_check'],
-                        'args' => [],
+                        'args' => [
+                            'fields' => [
+                                'default' => true,
+                                'type' => 'boolean',
+                                'description' => __('Retrieves the ACF fields from the site.'),
+                            ],
+                            'gps' => [
+                                'default' => false,
+                                'type' => 'boolean',
+                                'description' => __('Retrieves only the GPS coordinates of the site.'),
+                            ],
+                        ],
                     ],
                     'schema' => [$this, 'get_public_item_schema'],
                 ]
@@ -91,5 +128,5 @@ if (!class_exists('IOD_Multisite_API')) {
     require_once dirname(__FILE__).'/class-multisite-get-site.php';
 
     // Instantiate
-    new IOD_Multisite_API();
+    new Multisite_API();
 }

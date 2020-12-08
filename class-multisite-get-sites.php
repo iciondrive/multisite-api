@@ -1,13 +1,15 @@
 <?php
 
-class IOD_Multisite_API_Get_Sites extends WP_REST_Controller
+namespace IciOnDrive;
+
+class Get_Sites extends \WP_REST_Controller
 {
     /**
      * Get a collection of items.
      *
-     * @param WP_REST_Request $request full data about the request
+     * @param \WP_REST_Request $request full data about the request
      *
-     * @return WP_Error|WP_REST_Response
+     * @return \WP_Error|\WP_REST_Response
      */
     public function callback($request)
     {
@@ -17,12 +19,51 @@ class IOD_Multisite_API_Get_Sites extends WP_REST_Controller
             'mature' => 0,
             'spam' => 0,
             'deleted' => 0,
-            'site__not_in' => [1],
+            'site__not_in' => [1, 91],
+            // 'count' => true,
+            'number' => $request['per_page'],
         ];
 
         $args = apply_filters('multisite_api/get_sites/args', $args);
         $sites = apply_filters('multisite_api/get_sites', get_sites($args));
 
+        foreach ($sites as $key => $site) {
+            switch_to_blog($site->blog_id);
+            // Get ACF Fields
+            if ($request['fields']) {
+                $site = $this->get_fields($site);
+            }
+
+            // Get GPS Coordinates
+            if ($request['gps']) {
+                $site = $this->get_coordinates($site);
+            }
+
+            restore_current_blog();
+        }
+
         return rest_ensure_response($sites);
+    }
+
+    protected function get_fields($site)
+    {
+        $home_id = get_option('page_on_front');
+        $fields = get_fields($home_id);
+        $site->fields = $fields;
+
+        return apply_filters('multisite_api/get_sites/fields', $site);
+    }
+
+    protected function get_coordinates($site)
+    {
+        $home_id = get_option('page_on_front');
+        $coordinates = get_field('business_details', $home_id)['address'];
+
+        $site->gps = [
+            'lat' => $coordinates['lat'],
+            'lng' => $coordinates['lng'],
+        ];
+
+        return apply_filters('multisite_api/get_sites/coordinates', $site);
     }
 }
