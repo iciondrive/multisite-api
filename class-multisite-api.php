@@ -48,11 +48,11 @@ if (!class_exists('Multisite_API')) {
         {
             // Get all sites
             register_rest_route(
-                self::NAMESPACE, '/sites',
+                self::NAMESPACE, '/'.$this->rest_base,
                 [
                     'methods' => \WP_REST_Server::READABLE,
                     'callback' => [$this->get_sites, 'callback'],
-                    // 'permission_callback' => [$this, 'get_item_permissions_check'],
+                    'permission_callback' => '__return_true',
                     'args' => [
                         'page' => [
                             'description' => __('Current page of the result.'),
@@ -69,13 +69,8 @@ if (!class_exists('Multisite_API')) {
                             'type' => 'boolean',
                             'description' => __('Retrieves the ACF fields from the site.'),
                         ],
-                        'gps' => [
-                            'default' => false,
-                            'type' => 'boolean',
-                            'description' => __('Retrieves only the GPS coordinates of the site.'),
-                        ],
                     ],
-                    // 'schema' => [$this, 'get_public_item_schema'],
+                    'schema' => [$this, 'get_public_item_schema'],
                 ]
             );
 
@@ -83,27 +78,18 @@ if (!class_exists('Multisite_API')) {
             register_rest_route(
                 self::NAMESPACE, '/'.$this->rest_base.'/(?P<id>[\d]+)',
                 [
+                    'methods' => \WP_REST_Server::READABLE,
+                        'callback' => [$this->get_site, 'callback'],
+                        'permission_callback' => '__return_true',
                     'args' => [
                         'id' => [
                             'description' => __('Unique identifier for the object.'),
                             'type' => 'integer',
                         ],
-                    ],
-                    [
-                        'methods' => \WP_REST_Server::READABLE,
-                        'callback' => [$this->get_site, 'callback'],
-                        // 'permission_callback' => [$this, 'get_item_permissions_check'],
-                        'args' => [
-                            'fields' => [
-                                'default' => true,
-                                'type' => 'boolean',
-                                'description' => __('Retrieves the ACF fields from the site.'),
-                            ],
-                            'gps' => [
-                                'default' => false,
-                                'type' => 'boolean',
-                                'description' => __('Retrieves only the GPS coordinates of the site.'),
-                            ],
+                        'fields' => [
+                            'default' => true,
+                            'type' => 'boolean',
+                            'description' => __('Retrieves the ACF fields from the site.'),
                         ],
                     ],
                     'schema' => [$this, 'get_public_item_schema'],
@@ -111,7 +97,7 @@ if (!class_exists('Multisite_API')) {
             );
         }
 
-        private function get_item_permissions_check()
+        public function get_item_permissions_check()
         {
             global $wp_version;
 
@@ -119,7 +105,7 @@ if (!class_exists('Multisite_API')) {
                 return current_user_can('setup_network');
             }
 
-            return is_super_admin();
+            return is_admin();
         }
     }
 

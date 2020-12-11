@@ -19,6 +19,13 @@ class Get_Site extends \WP_REST_Controller
             return $site;
         }
 
+        // Get ACF Fields
+        switch_to_blog($request['id']);
+        if ($request['fields']) {
+            $site = $this->get_fields($site);
+        }
+        restore_current_blog();
+
         return $site;
     }
 
@@ -36,16 +43,6 @@ class Get_Site extends \WP_REST_Controller
 
         $site = get_site((int) $id);
 
-        // Get ACF Fields
-        if ($request['fields']) {
-            $site = $this->get_fields($site);
-        }
-
-        // Get GPS Coordinates
-        if ($request['gps']) {
-            $site = $this->get_coordinates($site);
-        }
-
         if (empty($site) || empty($site->blog_id)) {
             return $error;
         }
@@ -60,17 +57,5 @@ class Get_Site extends \WP_REST_Controller
         $site->fields = $fields;
 
         return apply_filters('multisite_api/get_site/fields', $site);
-    }
-
-    protected function get_coordinates($site)
-    {
-        $coordinates = $site->fields['business_details']['address'];
-
-        $site->gps = [
-            'lat' => $coordinates['lat'],
-            'lng' => $coordinates['lng'],
-        ];
-
-        return apply_filters('multisite_api/get_site/gps', $site);
     }
 }

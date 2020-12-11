@@ -33,12 +33,6 @@ class Get_Sites extends \WP_REST_Controller
             if ($request['fields']) {
                 $site = $this->get_fields($site);
             }
-
-            // Get GPS Coordinates
-            if ($request['gps']) {
-                $site = $this->get_coordinates($site);
-            }
-
             restore_current_blog();
         }
 
@@ -52,18 +46,5 @@ class Get_Sites extends \WP_REST_Controller
         $site->fields = $fields;
 
         return apply_filters('multisite_api/get_sites/fields', $site);
-    }
-
-    protected function get_coordinates($site)
-    {
-        $home_id = get_option('page_on_front');
-        $coordinates = get_field('business_details', $home_id)['address'];
-
-        $site->gps = [
-            'lat' => $coordinates['lat'],
-            'lng' => $coordinates['lng'],
-        ];
-
-        return apply_filters('multisite_api/get_sites/coordinates', $site);
     }
 }
