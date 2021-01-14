@@ -64,6 +64,11 @@ if (!class_exists('Multisite_API')) {
                             'type' => 'integer',
                             'default' => 10,
                         ],
+                        'order' => [
+                            'description' => __('How to order retrieved sites. Accepts "ASC", "DESC".'),
+                            'type' => 'string',
+                            'default' => 'ASC',
+                        ],
                         'fields' => [
                             'default' => true,
                             'type' => 'boolean',

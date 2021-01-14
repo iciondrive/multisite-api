@@ -20,7 +20,8 @@ class Get_Sites extends \WP_REST_Controller
             'spam' => 0,
             'deleted' => 0,
             'site__not_in' => [1, 91],
-            // 'count' => true,
+            'orderby' => 'path',
+            'order' => $request['order'],
             'number' => $request['per_page'],
         ];
 
